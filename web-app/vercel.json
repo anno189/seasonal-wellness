@@ -3,12 +3,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "builds": [
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node"
+  "functions": {
+    "api/index.ts": {
+      "inlineFiles": ["data/**"]
     }
-  ],
+  },
   "rewrites": [
     {
       "source": "/api/:path*",

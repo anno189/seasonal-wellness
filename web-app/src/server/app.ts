@@ -8,9 +8,7 @@ import express, {
   type NextFunction,
 } from 'express'
 import cors from 'cors'
-import path from 'path'
 import dotenv from 'dotenv'
-import { fileURLToPath } from 'url'
 import authRoutes from './routes/auth.js'
 import solarTermRoutes from './routes/solarTerm.js'
 import wellnessRoutes from './routes/wellness.js'
@@ -20,8 +18,7 @@ import constitutionRoutes from './routes/constitution.js'
 import weatherRoutes from './routes/weather.js'
 
 // for esm mode
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const __dirname = import.meta.dirname
 
 // load env
 dotenv.config()

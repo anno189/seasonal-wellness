@@ -5,13 +5,9 @@
 import { Router, Request, Response } from 'express'
 import ConstitutionService from '../services/ConstitutionService'
 import ConstitutionLoader from '../engines/ConstitutionLoader'
-import { readFileSync } from 'fs'
-import { resolve, dirname } from 'path'
-import { fileURLToPath } from 'url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-const DATA_DIR = resolve(__dirname, '../../../data')
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+const DATA_DIR = resolve(import.meta.dirname, '../../../data')
 
 const router = Router()
 

@@ -2,13 +2,9 @@
  * HerbalTeaService v2.0 — 花草茶服务
  */
 
-import { readFileSync } from 'fs'
-import { resolve, dirname } from 'path'
-import { fileURLToPath } from 'url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-const DATA_DIR = resolve(__dirname, '../../../data')
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+const DATA_DIR = resolve(import.meta.dirname, '../../../data')
 
 const WEATHER_WEIGHT_MAP: Record<string, { cool: number; warm: number; moist: number }> = {
   '晴天':   { cool: 1.2, warm: 1.0, moist: 0.8 },

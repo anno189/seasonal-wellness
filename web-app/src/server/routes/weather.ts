@@ -6,7 +6,7 @@
 import { Router, Request, Response } from 'express'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import WeatherService from '../services/WeatherService'
+import WeatherService from '../services/WeatherService.js'
 
 const CITIES_FILE = resolve(process.cwd(), 'data/cities.json')
 

@@ -3,12 +3,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "functions": {
-    "api/index.ts": {
-      "runtime": "@vercel/node@5.3.6",
-      "includeFiles": "data/**"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/:path*",

@@ -3,7 +3,7 @@
  */
 
 import { Router, Request, Response } from 'express'
-import RecipeService from '../services/RecipeService'
+import RecipeService from '../services/RecipeService.js'
 
 const router = Router()
 

@@ -3,7 +3,7 @@
  */
 
 import { Router, Request, Response } from 'express'
-import WellnessPlanService from '../services/WellnessPlanService'
+import WellnessPlanService from '../services/WellnessPlanService.js'
 
 const router = Router()
 

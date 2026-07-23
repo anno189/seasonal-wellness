@@ -5,8 +5,8 @@
 import { Router, Request, Response } from 'express'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import ConstitutionService from '../services/ConstitutionService'
-import ConstitutionLoader from '../engines/ConstitutionLoader'
+import ConstitutionService from '../services/ConstitutionService.js'
+import ConstitutionLoader from '../engines/ConstitutionLoader.js'
 
 const DATA_DIR = resolve(process.cwd(), 'data')
 

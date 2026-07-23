@@ -2,13 +2,13 @@
  * WellnessPlanService: 方案生成服务（核心规则引擎入口）
  */
 
-import { InvarianceLayer } from '../engines/InvarianceLayer'
-import RegionalAdaptation from '../engines/RegionalAdaptation'
-import ConstitutionAdaptation from '../engines/ConstitutionAdaptation'
-import PlanSynthesis from '../engines/PlanSynthesis'
+import { InvarianceLayer } from '../engines/InvarianceLayer.js'
+import RegionalAdaptation from '../engines/RegionalAdaptation.js'
+import ConstitutionAdaptation from '../engines/ConstitutionAdaptation.js'
+import PlanSynthesis from '../engines/PlanSynthesis.js'
 import RecipeService from './RecipeService'
 import HerbalTeaService from './HerbalTeaService'
-import WeatherCorrection from '../engines/WeatherCorrection'
+import WeatherCorrection from '../engines/WeatherCorrection.js'
 
 export class WellnessPlanService {
   static async generatePlan(params: {

@@ -227,10 +227,14 @@
    Mobile
    ============================================================ */
 @media (max-width: 1023px) {
-  /* Sidebar content: allow flex item to shrink */
-  .sidebar-content {
-    min-height: 0;
+  /* In vertical layout, the right sidebar takes a fixed height with scroll */
+  .sidebar-wrapper {
+    flex: 0 0 280px !important;
     overflow-y: auto;
+  }
+
+  /* Sidebar content */
+  .sidebar-content {
     padding: 1.25rem 1rem;
   }
 
@@ -241,8 +245,8 @@
   }
 
   .sidebar-content .ring-container .ring-svg {
-    width: 130px;
-    height: 85px;
+    width: 120px;
+    height: 78px;
   }
 
   /* Page content grids: prevent overflow */

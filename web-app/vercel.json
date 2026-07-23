@@ -6,7 +6,7 @@
   "functions": {
     "api/index.ts": {
       "runtime": "@vercel/node@5.3.6",
-      "includeFiles": ["data/**"]
+      "includeFiles": "data/**"
     }
   },
   "rewrites": [

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
-const DATA_DIR = resolve(__dirname, '../../data')
+const DATA_DIR = resolve(__dirname, '../../../data')
 
 const WEATHER_WEIGHT_MAP: Record<string, { cool: number; warm: number; moist: number }> = {
   '晴天':   { cool: 1.2, warm: 1.0, moist: 0.8 },

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
-const DATA_DIR = resolve(__dirname, '../../data')
+const DATA_DIR = resolve(__dirname, '../../../data')
 
 const TERM_ORDER = [
   '立春', '雨水', '惊蛰', '春分', '清明', '谷雨',

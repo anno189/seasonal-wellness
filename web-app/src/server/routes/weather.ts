@@ -11,7 +11,7 @@ import WeatherService from '../services/WeatherService'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
-const CITIES_FILE = resolve(__dirname, '../../data/cities.json')
+const CITIES_FILE = resolve(__dirname, '../../../data/cities.json')
 
 const router = Router()
 

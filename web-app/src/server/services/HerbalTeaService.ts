@@ -5,6 +5,7 @@
 import { readFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
+import RegionalAdaptation from '../engines/RegionalAdaptation.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -52,26 +53,27 @@ function loadTeaPools() {
 let teaCache: any[] = []
 
 export class HerbalTeaService {
-  static getTeaRecommendation(term: string, constitution: string, weather: string | null = null, date: string | null = null) {
+  static getTeaRecommendation(term: string, constitution: string, weather: string | null = null, date: string | null = null, city: string | null = null, opts?: { intensityFactor?: number }) {
     const pools = teaCache.length ? teaCache : loadTeaPools()
     teaCache = pools
 
     const pool = pools.find(p => p.solar_term === term && p.constitution_type === constitution)
     if (!pool) {
       const fallbackPool = pools.find(p => p.solar_term === term)
-      if (fallbackPool) return this.getFromPool(fallbackPool, weather, date)
+      if (fallbackPool) return this.getFromPool(fallbackPool, weather, date, city, opts?.intensityFactor)
       return this.getDefaultTea(term)
     }
-    return this.getFromPool(pool, weather, date)
+    return this.getFromPool(pool, weather, date, city, opts?.intensityFactor)
   }
 
-  static getFromPool(pool: any, weather: string | null, date: string | null) {
+  static getFromPool(pool: any, weather: string | null, date: string | null, city: string | null, intensityFactor: number = 1.0) {
     const teaPool = pool.tea_pool || []
     const teaDirection = pool.tea_direction || ''
     const baseWeights = pool.weather_weights || { cool_tea_weight: 1.0, warm_tea_weight: 1.0, moist_tea_weight: 1.0 }
 
     if (teaPool.length === 0) return this.getDefaultTea(pool.solar_term)
 
+    // 天气权重
     const weatherMap = weather ? (WEATHER_WEIGHT_MAP[weather] || WEATHER_WEIGHT_MAP['多云']) : null
     const finalWeights = weatherMap
       ? {
@@ -85,19 +87,51 @@ export class HerbalTeaService {
           moist: baseWeights.moist_tea_weight,
         }
 
+    // 地域权重叠加
+    let regionWeights = { cool: 1.0, warm: 1.0, moist: 1.0 }
+    if (city) {
+      const cityAdaptation = RegionalAdaptation.getAdaptation(city, pool.solar_term)
+      const rw = cityAdaptation?.regional_weight
+      if (rw) {
+        regionWeights = {
+          cool: rw.cool_weight || 1.0,
+          warm: rw.warm_weight || 1.0,
+          moist: rw.damp_weight || 1.0,
+        }
+      }
+    }
+
+    // 评分：天气权重 × 地域权重 × 过渡期强度衰减
     const scoredTeas = teaPool.map((tea: any) => {
       const { coolScore, warmScore, moistScore } = classifyTea(tea.ingredients)
-      const weightedScore = coolScore * finalWeights.cool + warmScore * finalWeights.warm + moistScore * finalWeights.moist
-      return { tea, weightedScore }
+      const weightedScore =
+        coolScore * finalWeights.cool * regionWeights.cool +
+        warmScore * finalWeights.warm * regionWeights.warm +
+        moistScore * finalWeights.moist * regionWeights.moist
+      // 过渡期强度衰减：极端花草茶（大寒大热）降分
+      let teaFactor = 1.0
+      if (intensityFactor < 1.0) {
+        const extremeCoolTea = ['苦瓜', '金银花', '栀子', '莲子心', '蒲公英']
+        const extremeWarmTea = ['生姜', '桂圆', '当归']
+        const allIngredients = tea.ingredients.join('')
+        if (extremeCoolTea.some(k => allIngredients.includes(k)) || extremeWarmTea.some(k => allIngredients.includes(k))) {
+          teaFactor = intensityFactor
+        }
+      }
+      return { tea, weightedScore: weightedScore * teaFactor }
     })
 
     scoredTeas.sort((a, b) => b.weightedScore - a.weightedScore)
 
     const seed = date ? this.generateSeed(date) : 0
-    const primaryIndex = seed % scoredTeas.length
-    const primaryTea = scoredTeas[primaryIndex].tea
-    const altIndex = (seed + 1) % scoredTeas.length
-    const alternativeTea = scoredTeas[altIndex].tea
+    // 取前 30% 高分候选中的一项，确保天气/地域权重真正影响结果
+    const topCount = Math.max(1, Math.ceil(scoredTeas.length * 0.3))
+    const topPool = scoredTeas.slice(0, topCount)
+    const selectIdx = seed % topPool.length
+    const primaryTea = topPool[selectIdx].tea
+    // 备选取剩余候选中的最高分
+    const remaining = scoredTeas.slice(topCount)
+    const altTea = remaining.length > 0 ? remaining[0].tea : (topPool.length > 1 ? topPool[(selectIdx + 1) % topPool.length].tea : null)
     const weatherNote = weather ? this.generateWeatherNote(weather, teaDirection, finalWeights) : ''
 
     return {
@@ -107,11 +141,11 @@ export class HerbalTeaService {
         preparation: primaryTea.preparation,
         note: primaryTea.note,
       },
-      alternative: alternativeTea ? {
-        name: alternativeTea.name,
-        ingredients: alternativeTea.ingredients,
-        preparation: alternativeTea.preparation,
-        note: alternativeTea.note,
+      alternative: altTea ? {
+        name: altTea.name,
+        ingredients: altTea.ingredients,
+        preparation: altTea.preparation,
+        note: altTea.note,
       } : null,
       direction: teaDirection,
       weather_note: weatherNote,
@@ -119,7 +153,9 @@ export class HerbalTeaService {
       meta: {
         solar_term: pool.solar_term,
         constitution_type: pool.constitution_type,
+        city: city || '未知',
         weather_adjusted: !!weather,
+        region_adjusted: !!city,
       },
     }
   }

@@ -3,7 +3,7 @@
  */
 
 export class PlanSynthesis {
-  static synthesize(cm1: any, cm2: any, cm3: any) {
+  static synthesize(cm1: any, cm2: any, cm3: any, opts?: { intensityOverride?: number }) {
     const {
       term,
       wellness_direction,
@@ -21,7 +21,11 @@ export class PlanSynthesis {
       diet_restrictions,
     } = cm3
 
-    const intensityFactor = this.calculateIntensity(intensity_modifier, seasonal_bias)
+    let intensityFactor = this.calculateIntensity(intensity_modifier, seasonal_bias)
+    // 过渡期强度覆盖
+    if (opts?.intensityOverride != null) {
+      intensityFactor *= opts.intensityOverride
+    }
 
     const health = this.buildHealthPlan({
       term,
@@ -65,6 +69,7 @@ export class PlanSynthesis {
         intensity: intensity_modifier,
         focus_shift,
         regional_note: seasonal_bias.note,
+        intensity_override: opts?.intensityOverride,
       },
     }
   }

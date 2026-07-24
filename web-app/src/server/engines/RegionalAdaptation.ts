@@ -31,6 +31,20 @@ function loadCitiesData() {
 
 let citiesCache: CityEntry[] = []
 
+interface SeasonalBias {
+  temp_adjustment: number
+  humidity_adjustment: number
+  diet_adjustment: string
+  note: string
+}
+
+interface RegionalWeight {
+  cool: number   // 寒凉类食材修正
+  warm: number   // 温热类食材修正
+  damp: number   // 湿润类食材修正
+  dry: number    // 干燥类食材修正
+}
+
 export class RegionalAdaptation {
   static getAdaptation(city: string, term: string) {
     const data = citiesCache.length ? citiesCache : loadCitiesData()
@@ -40,16 +54,52 @@ export class RegionalAdaptation {
       return this.getGenericAdaptation(term)
     }
     const seasonalBias = this.calculateSeasonalBias(term, cityData)
+    const regionalWeight = this.calculateRegionalWeight(term, cityData, seasonalBias)
     return {
       city: cityData.city,
       climate_type: cityData.climate_type,
       avg_temp: `${cityData.avg_temp_jul_min}-${cityData.avg_temp_jul_max}°C (7月)`,
       humidity: cityData.humidity_range,
       seasonal_bias: seasonalBias,
+      regional_weight: regionalWeight,
       temperature_adjustment: seasonalBias.temp_adjustment,
       humidity_adjustment: seasonalBias.humidity_adjustment,
       diet_adjustment: seasonalBias.diet_adjustment,
     }
+  }
+
+  /** 根据气候类型和节气计算地域权重 */
+  static calculateRegionalWeight(term: string, cityData: CityEntry, bias: SeasonalBias): RegionalWeight {
+    const { climate_type } = cityData
+    const hotTerms = ['小暑', '大暑', '夏至', '芒种', '小满', '立夏']
+    const coldTerms = ['小寒', '大寒', '冬至', '大雪', '小雪', '立冬']
+
+    const result: RegionalWeight = { cool: 1.0, warm: 1.0, damp: 1.0, dry: 1.0 }
+
+    if (hotTerms.includes(term)) {
+      if (climate_type.includes('温带大陆性') || climate_type.includes('温带季风')) {
+        result.cool = 1.2
+        result.dry = 1.2
+      } else if (climate_type.includes('亚热带')) {
+        result.cool = 1.1
+        result.damp = 1.2
+      } else if (climate_type.includes('南亚热带') || climate_type.includes('热带')) {
+        result.cool = 1.3
+        result.damp = 1.1
+      }
+    } else if (coldTerms.includes(term)) {
+      if (climate_type.includes('温带大陆性') || climate_type.includes('温带季风')) {
+        result.warm = 1.3
+        result.dry = 1.1
+      } else if (climate_type.includes('亚热带')) {
+        result.warm = 1.1
+        result.damp = 1.1
+      } else if (climate_type.includes('南亚热带') || climate_type.includes('热带')) {
+        result.warm = 0.9
+      }
+    }
+
+    return result
   }
 
   static calculateSeasonalBias(term: string, cityData: CityEntry) {
@@ -57,7 +107,7 @@ export class RegionalAdaptation {
     const hotTerms = ['小暑', '大暑', '夏至', '芒种', '小满', '立夏']
     const coldTerms = ['小寒', '大寒', '冬至', '大雪', '小雪', '立冬']
 
-    let bias = {
+    let bias: SeasonalBias = {
       temp_adjustment: 1.0,
       humidity_adjustment: 1.0,
       diet_adjustment: '',
@@ -111,6 +161,10 @@ export class RegionalAdaptation {
         diet_adjustment: '通用养生',
         note: '未知地域，使用通用节气养生方案',
       },
+      regional_weight: { cool: 1.0, warm: 1.0, damp: 1.0, dry: 1.0 },
+      temperature_adjustment: 1.0,
+      humidity_adjustment: 1.0,
+      diet_adjustment: '通用养生',
     }
   }
 }

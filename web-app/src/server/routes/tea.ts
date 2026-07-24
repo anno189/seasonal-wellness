@@ -9,7 +9,7 @@ const router = Router()
 
 router.get('/daily', (req: Request, res: Response) => {
   try {
-    const { term, constitution, weather, date, refresh } = req.query
+    const { term, constitution, weather, date, city, refresh } = req.query
 
     if (!term) {
       return res.status(400).json({ error: '缺少节气参数 (term)' })
@@ -20,11 +20,18 @@ router.get('/daily', (req: Request, res: Response) => {
       ? new Date(Date.now() + Math.floor(Math.random() * 86400000 * 30))
       : (dateParam ? new Date(dateParam) : new Date())
 
+    const cityParam = (city as string) || null
+    const dateStr = seedDate.toISOString().split('T')[0]
+    // 过渡期强度因子
+    const transitionIntensity = 1.0 // 由 WellnessPlanService 层计算，此处保留默认值
+
     const tea = HerbalTeaService.getTeaRecommendation(
       term as string,
       (constitution as string) || '平和质',
       (weather as string) || null,
-      seedDate.toISOString().split('T')[0]
+      dateStr,
+      cityParam,
+      { intensityFactor: transitionIntensity }
     )
 
     res.json(tea)

@@ -7,7 +7,7 @@ export default function Layout() {
     <div className="one-screen">
       <Nav />
       <div className="card overflow-y-auto scrollable">
-        <div className="flex flex-col lg:flex-row h-full min-h-0">
+        <div className="flex flex-col lg:flex-row min-h-0 overflow-y-auto scrollable">
           {/* Left content — switches on menu click */}
           <div className="flex-1 min-h-0 flex flex-col">
             <div className="flex-1 min-h-0 p-6 overflow-y-auto scrollable">

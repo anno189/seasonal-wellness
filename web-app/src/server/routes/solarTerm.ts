@@ -3,7 +3,7 @@
  */
 
 import { Router, Request, Response } from 'express'
-import { InvarianceLayer } from '../engines/InvarianceLayer'
+import { InvarianceLayer } from '../engines/InvarianceLayer.js'
 import { readFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'

@@ -7,7 +7,7 @@ import { Router, Request, Response } from 'express'
 import { readFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
-import WeatherService from '../services/WeatherService'
+import WeatherService from '../services/WeatherService.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)

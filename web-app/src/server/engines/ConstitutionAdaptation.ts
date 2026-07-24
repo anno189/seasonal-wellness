@@ -2,7 +2,7 @@
  * CM3: 体质适配层 (Constitution Adaptation)
  */
 
-import ConstitutionLoader from './ConstitutionLoader'
+import ConstitutionLoader from './ConstitutionLoader.js'
 
 export class ConstitutionAdaptation {
   static getAdaptation(constitution: string, term: string) {

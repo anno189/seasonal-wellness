@@ -3,8 +3,8 @@
  */
 
 import { Router, Request, Response } from 'express'
-import ConstitutionService from '../services/ConstitutionService'
-import ConstitutionLoader from '../engines/ConstitutionLoader'
+import ConstitutionService from '../services/ConstitutionService.js'
+import ConstitutionLoader from '../engines/ConstitutionLoader.js'
 import { readFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'

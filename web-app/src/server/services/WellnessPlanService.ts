@@ -6,8 +6,8 @@ import { InvarianceLayer } from '../engines/InvarianceLayer.js'
 import RegionalAdaptation from '../engines/RegionalAdaptation.js'
 import ConstitutionAdaptation from '../engines/ConstitutionAdaptation.js'
 import PlanSynthesis from '../engines/PlanSynthesis.js'
-import RecipeService from './RecipeService'
-import HerbalTeaService from './HerbalTeaService'
+import RecipeService from './RecipeService.js'
+import HerbalTeaService from './HerbalTeaService.js'
 import WeatherCorrection from '../engines/WeatherCorrection.js'
 
 export class WellnessPlanService {

@@ -2,15 +2,28 @@
  * ConstitutionLoader: 加载合并版体质数据
  */
 
-import { constitutions } from '../data/index.js'
+import { readFileSync } from 'fs'
+import { resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const DATA_DIR = resolve(__dirname, '../../../data')
 
 class ConstitutionLoader {
-  private cache: typeof constitutions = []
+  private cache: any[] = []
 
   load() {
     if (this.cache.length) return this.cache
-    this.cache = constitutions
-    return this.cache
+    const poolFile = resolve(DATA_DIR, 'constitutions-v2.json')
+    try {
+      const data = JSON.parse(readFileSync(poolFile, 'utf-8'))
+      this.cache = data.entries || []
+      return this.cache
+    } catch (err) {
+      console.error(`Error loading constitutions-v2.json: ${err.message}`)
+      return []
+    }
   }
 
   getByConstitutionAndTerm(constitution: string, term: string) {

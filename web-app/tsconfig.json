@@ -15,7 +15,6 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true,
     "strict": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
@@ -36,10 +35,6 @@
   "include": [
     "src",
     "api",
-    "src/server",
-    "data/index.d.ts"
-  ],
-  "files": [
-    "data/index.d.ts"
+    "src/server"
   ]
 }

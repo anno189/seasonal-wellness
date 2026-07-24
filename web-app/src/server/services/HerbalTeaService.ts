@@ -2,7 +2,13 @@
  * HerbalTeaService v2.0 — 花草茶服务
  */
 
-import { teaPools } from '../data/index.js'
+import { readFileSync } from 'fs'
+import { resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const DATA_DIR = resolve(__dirname, '../../../data')
 
 const WEATHER_WEIGHT_MAP: Record<string, { cool: number; warm: number; moist: number }> = {
   '晴天':   { cool: 1.2, warm: 1.0, moist: 0.8 },
@@ -32,12 +38,24 @@ function classifyTea(ingredients: string[]) {
   return { coolScore, warmScore, moistScore }
 }
 
-let teaCache: typeof teaPools = []
+function loadTeaPools() {
+  const poolFile = resolve(DATA_DIR, 'herbal_tea_pool_v2.json')
+  try {
+    const data = JSON.parse(readFileSync(poolFile, 'utf-8'))
+    return data.entries || []
+  } catch (err) {
+    console.error(`Error loading herbal_tea_pool_v2.json: ${err.message}`)
+    return []
+  }
+}
+
+let teaCache: any[] = []
 
 export class HerbalTeaService {
   static getTeaRecommendation(term: string, constitution: string, weather: string | null = null, date: string | null = null) {
-    const pools = teaCache.length ? teaCache : teaPools
+    const pools = teaCache.length ? teaCache : loadTeaPools()
     teaCache = pools
+
     const pool = pools.find(p => p.solar_term === term && p.constitution_type === constitution)
     if (!pool) {
       const fallbackPool = pools.find(p => p.solar_term === term)
@@ -56,14 +74,23 @@ export class HerbalTeaService {
 
     const weatherMap = weather ? (WEATHER_WEIGHT_MAP[weather] || WEATHER_WEIGHT_MAP['多云']) : null
     const finalWeights = weatherMap
-      ? { cool: baseWeights.cool_tea_weight * weatherMap.cool, warm: baseWeights.warm_tea_weight * weatherMap.warm, moist: baseWeights.moist_tea_weight * weatherMap.moist }
-      : { cool: baseWeights.cool_tea_weight, warm: baseWeights.warm_tea_weight, moist: baseWeights.moist_tea_weight }
+      ? {
+          cool: baseWeights.cool_tea_weight * weatherMap.cool,
+          warm: baseWeights.warm_tea_weight * weatherMap.warm,
+          moist: baseWeights.moist_tea_weight * weatherMap.moist,
+        }
+      : {
+          cool: baseWeights.cool_tea_weight,
+          warm: baseWeights.warm_tea_weight,
+          moist: baseWeights.moist_tea_weight,
+        }
 
     const scoredTeas = teaPool.map((tea: any) => {
       const { coolScore, warmScore, moistScore } = classifyTea(tea.ingredients)
       const weightedScore = coolScore * finalWeights.cool + warmScore * finalWeights.warm + moistScore * finalWeights.moist
       return { tea, weightedScore }
     })
+
     scoredTeas.sort((a, b) => b.weightedScore - a.weightedScore)
 
     const seed = date ? this.generateSeed(date) : 0
@@ -74,21 +101,39 @@ export class HerbalTeaService {
     const weatherNote = weather ? this.generateWeatherNote(weather, teaDirection, finalWeights) : ''
 
     return {
-      primary: { name: primaryTea.name, ingredients: primaryTea.ingredients, preparation: primaryTea.preparation, note: primaryTea.note },
-      alternative: alternativeTea ? { name: alternativeTea.name, ingredients: alternativeTea.ingredients, preparation: alternativeTea.preparation, note: alternativeTea.note } : null,
+      primary: {
+        name: primaryTea.name,
+        ingredients: primaryTea.ingredients,
+        preparation: primaryTea.preparation,
+        note: primaryTea.note,
+      },
+      alternative: alternativeTea ? {
+        name: alternativeTea.name,
+        ingredients: alternativeTea.ingredients,
+        preparation: alternativeTea.preparation,
+        note: alternativeTea.note,
+      } : null,
       direction: teaDirection,
       weather_note: weatherNote,
       weather_weights: weatherMap ? finalWeights : null,
-      meta: { solar_term: pool.solar_term, constitution_type: pool.constitution_type, weather_adjusted: !!weather },
+      meta: {
+        solar_term: pool.solar_term,
+        constitution_type: pool.constitution_type,
+        weather_adjusted: !!weather,
+      },
     }
   }
 
   static generateWeatherNote(weather: string, direction: string, weights: any) {
     const notes: Record<string, string> = {
-      '晴天': '天气晴好，建议增加清热类花草茶', '多云': '天气温和，按标准配方饮用',
-      '阴天': '天气阴沉，建议增加温补类花草茶', '小雨': '天气潮湿，建议增加祛湿类花草茶',
-      '中雨': '雨水较多，加强祛湿茶饮', '大雨': '大雨连绵，注重健脾祛湿茶饮',
-      '高温': '高温天气，增加清热解暑茶饮', '低温': '低温天气，增加温补茶饮',
+      '晴天': '天气晴好，建议增加清热类花草茶',
+      '多云': '天气温和，按标准配方饮用',
+      '阴天': '天气阴沉，建议增加温补类花草茶',
+      '小雨': '天气潮湿，建议增加祛湿类花草茶',
+      '中雨': '雨水较多，加强祛湿茶饮',
+      '大雨': '大雨连绵，注重健脾祛湿茶饮',
+      '高温': '高温天气，增加清热解暑茶饮',
+      '低温': '低温天气，增加温补茶饮',
       '雾霾': '空气质量差，建议饮用润肺清肺茶饮',
     }
     return notes[weather] || ''
@@ -101,19 +146,30 @@ export class HerbalTeaService {
 
   static getDefaultTea(term: string) {
     return {
-      primary: { name: '根据节气推荐花草茶', ingredients: ['根据节气和体质推荐'], preparation: '沸水冲泡10-15分钟', note: '未找到对应的花草茶池数据' },
-      alternative: null, direction: '根据节气调理', weather_note: '', weather_weights: null,
+      primary: {
+        name: '根据节气推荐花草茶',
+        ingredients: ['根据节气和体质推荐'],
+        preparation: '沸水冲泡10-15分钟',
+        note: '未找到对应的花草茶池数据',
+      },
+      alternative: null,
+      direction: '根据节气调理',
+      weather_note: '',
+      weather_weights: null,
       meta: { solar_term: term, note: '未找到对应的花草茶池数据' },
     }
   }
 
   static getTeaByTerm(term: string) {
-    const pools = teaCache.length ? teaCache : teaPools
+    const pools = teaCache.length ? teaCache : loadTeaPools()
     teaCache = pools
     const poolsForTerm = pools.filter(p => p.solar_term === term)
     const recommendations: Record<string, any> = {}
     for (const pool of poolsForTerm) {
-      recommendations[pool.constitution_type] = { direction: pool.tea_direction, teas: pool.tea_pool }
+      recommendations[pool.constitution_type] = {
+        direction: pool.tea_direction,
+        teas: pool.tea_pool,
+      }
     }
     return recommendations
   }

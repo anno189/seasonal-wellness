@@ -15,7 +15,7 @@ export default function Layout() {
             </div>
           </div>
           {/* Right sidebar — always visible */}
-          <div className="sidebar-wrapper lg:w-96 flex-shrink-0 lg:flex-shrink-0 border-t lg:border-t-0 lg:border-l border-bone-soft/8">
+          <div className="lg:w-96 flex-shrink-0 border-t lg:border-t-0 lg:border-l border-bone-soft/8">
             <RightSidebar />
           </div>
         </div>

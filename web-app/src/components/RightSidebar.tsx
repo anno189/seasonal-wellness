@@ -84,7 +84,7 @@ export default function RightSidebar() {
   const seasonColor = SEASON_MAP[season] || '#D4A843'
 
   return (
-    <div className="sidebar-content flex flex-col items-center justify-center p-6 h-full w-full">
+    <div className="flex flex-col items-center justify-center p-6 h-full">
       {/* City + Weather */}
       <div className="w-full mb-4">
         {cityName ? (
@@ -113,9 +113,7 @@ export default function RightSidebar() {
       </div>
 
       {/* Dual Ring */}
-      <div className="ring-container">
-        <DualRing currentTerm={currentTerm} currentDay={currentDay} />
-      </div>
+      <DualRing currentTerm={currentTerm} currentDay={currentDay} />
 
       {/* Info List */}
       <div className="mt-4 w-full space-y-3">

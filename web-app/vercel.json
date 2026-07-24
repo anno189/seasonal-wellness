@@ -9,26 +9,6 @@
       "destination": "/api/index"
     },
     {
-      "source": "/sw.js",
-      "destination": "/sw.js"
-    },
-    {
-      "source": "/manifest.json",
-      "destination": "/manifest.json"
-    },
-    {
-      "source": "/registerSW.js",
-      "destination": "/registerSW.js"
-    },
-    {
-      "source": "/favicon.svg",
-      "destination": "/favicon.svg"
-    },
-    {
-      "source": "/icons/:path*",
-      "destination": "/icons/:path*"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -2,13 +2,41 @@
  * CM1: 节气不变层 (Solar Term Invariance)
  */
 
-import { solarTerms } from '../data/index.js'
+import { readFileSync } from 'fs'
+import { resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
 
-let solarTermsCache: typeof solarTerms = []
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const DATA_DIR = resolve(__dirname, '../../../data')
+
+interface SolarTermEntry {
+  term_name: string
+  solar_longitude: string
+  climate_trend: string
+  yinyang_attribute: string
+  tcm_organ_command: string
+  wellness_direction: string
+  vulnerability_points: string[]
+  season: string
+}
+
+function loadSolarTermsData() {
+  const poolFile = resolve(DATA_DIR, 'solar_terms.json')
+  try {
+    const data = JSON.parse(readFileSync(poolFile, 'utf-8'))
+    return data.solar_terms || []
+  } catch (err) {
+    console.error(`Error loading solar_terms.json: ${err.message}`)
+    return []
+  }
+}
+
+let solarTermsCache: SolarTermEntry[] = []
 
 export class InvarianceLayer {
   static getInvariance(term: string) {
-    const data = solarTermsCache.length ? solarTermsCache : solarTerms
+    const data = solarTermsCache.length ? solarTermsCache : loadSolarTermsData()
     solarTermsCache = data
     const entry = data.find(t => t.term_name === term)
     if (!entry) {
@@ -19,7 +47,7 @@ export class InvarianceLayer {
       solar_longitude: entry.solar_longitude,
       climate_pattern: entry.climate_trend,
       yinyang: entry.yinyang_attribute,
-      tcm_organ: entry.yinyang_attribute,
+      tcm_organ: entry.tcm_organ_command,
       wellness_direction: entry.wellness_direction,
       vulnerability_points: entry.vulnerability_points,
       season: entry.season,
@@ -29,7 +57,12 @@ export class InvarianceLayer {
   static getCurrentHou(term: string, day: number) {
     const houIndex = Math.min(Math.floor((day - 1) / 5), 2)
     const houNames = ['初候', '中候', '末候']
-    return { name: houNames[houIndex], day: houIndex * 5 + 1, end_day: (houIndex + 1) * 5, intensity: houIndex === 0 ? 0.8 : houIndex === 1 ? 1.0 : 1.2 }
+    return {
+      name: houNames[houIndex],
+      day: houIndex * 5 + 1,
+      end_day: (houIndex + 1) * 5,
+      intensity: houIndex === 0 ? 0.8 : houIndex === 1 ? 1.0 : 1.2,
+    }
   }
 
   static getHouIntensity(day: number) {

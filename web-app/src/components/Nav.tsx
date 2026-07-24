@@ -63,7 +63,7 @@ export default function Nav() {
             className={`nav-link ${currentPath === item.to ? 'active' : ''}`}
           >
             <span className="nav-icon">{item.icon}</span>
-            <span className="nav-text">{item.label}</span>
+            {item.label}
           </Link>
         ))}
       </div>

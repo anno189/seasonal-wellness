@@ -3,7 +3,7 @@
  */
 
 import { Router, Request, Response } from 'express'
-import HerbalTeaService from '../services/HerbalTeaService.js'
+import HerbalTeaService from '../services/HerbalTeaService'
 
 const router = Router()
 
